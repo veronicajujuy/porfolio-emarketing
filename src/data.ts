@@ -104,6 +104,6 @@ export const raizCampaignCopies: CampaignCopy[] = [
 
 export const imageAssets = {
   cover: '/src/assets/images/raiz_brand_cover_1782999167651.jpg',
-  profile: '/src/assets/images/veronica_profile_1782999179177.jpg',
+  profile: '/src/assets/images/veronica_profile_new_1783019107024.jpg',
   socialTile: '/src/assets/images/raiz_social_tile_1782999193330.jpg'
 };

@@ -109,9 +109,10 @@ export default function Hero({ onExploreClick, onContactClick }: HeroProps) {
               {/* Profile Image & Identification */}
               <div className="flex items-center gap-4 mb-6">
                 <img
-                  src="/src/assets/images/veronica_profile_1782999179177.jpg"
+                  src="/src/assets/images/veronica_profile_new_1783019107024.jpg"
                   alt="Verónica - Digital Marketer"
                   className="h-16 w-16 rounded-full object-cover border-2 border-emerald-500/30"
+                  referrerPolicy="no-referrer"
                   onError={(e) => {
                     // Fallback avatar if error
                     e.currentTarget.src = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80";
