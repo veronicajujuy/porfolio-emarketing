@@ -1,0 +1,6 @@
+{
+  "name": "Portfolio Marketing Digital - Verónica",
+  "description": "Portfolio profesional de marketing digital que destaca el caso de estudio de la marca Raíz (comida real, Jujuy) con herramientas interactivas de tono y simuladores de pauta.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
