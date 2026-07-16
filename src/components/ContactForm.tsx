@@ -19,36 +19,70 @@ import {
 export default function ContactForm() {
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     business: '',
     location: 'San Salvador de Jujuy',
     type: 'Gastronomía',
     message: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.message.trim()) return;
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) return;
 
-    // Simulate form submission
-    setIsSubmitted(true);
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const response = await fetch('https://hook.us2.make.com/tqo8em1z0iofdip4zebqp45jvb2ydovu', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nombre: formData.name,
+          email: formData.email,
+          emprendimiento: formData.business || 'No especificado',
+          ubicacion: formData.location,
+          rubro: formData.type,
+          mensaje: formData.message,
+          fecha: new Date().toISOString()
+        }),
+      });
+
+      if (response.ok) {
+        setIsSubmitted(true);
+      } else {
+        throw new Error('Hubo un problema al enviar el formulario. Por favor, intenta de nuevo.');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitError('Ocurrió un error al enviar el formulario. Por favor, intentá nuevamente o contactame directamente por WhatsApp.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {
     setFormData({
       name: '',
+      email: '',
       business: '',
       location: 'San Salvador de Jujuy',
       type: 'Gastronomía',
       message: ''
     });
     setIsSubmitted(false);
+    setSubmitError(null);
   };
 
   // Create pre-filled WhatsApp message based on form values
   const getWhatsAppLink = () => {
     const text = encodeURIComponent(
-      `Hola Verónica, soy ${formData.name}${formData.business ? ` de ${formData.business}` : ''}. Te contacto desde tu portfolio por mi negocio de ${formData.type} en ${formData.location}. Mi consulta: ${formData.message}`
+      `Hola Verónica, soy ${formData.name}${formData.business ? ` de ${formData.business}` : ''}. Te contacto desde tu portfolio por mi negocio de ${formData.type} en ${formData.location}. Mi correo es ${formData.email}. Mi consulta: ${formData.message}`
     );
     return `https://wa.me/5493881234567?text=${text}`; // Dummy local Jujuy number
   };
@@ -95,10 +129,27 @@ export default function ContactForm() {
                   />
                 </div>
 
+                {/* Email Address */}
+                <div>
+                  <label className="text-xs font-semibold text-stone-300 uppercase tracking-wider font-mono block mb-2">
+                    Tu Correo Electrónico *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="Ej: veronica@ejemplo.com"
+                    className="w-full bg-stone-950 border border-stone-850 rounded-xl px-4 py-3 text-stone-200 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-sans"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {/* Business Name */}
                 <div>
                   <label className="text-xs font-semibold text-stone-300 uppercase tracking-wider font-mono block mb-2">
-                    Tu Emprendimiento / Marca (Opcional)
+                    Emprendimiento / Marca
                   </label>
                   <input
                     type="text"
@@ -108,9 +159,7 @@ export default function ContactForm() {
                     className="w-full bg-stone-950 border border-stone-850 rounded-xl px-4 py-3 text-stone-200 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-sans"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {/* Location */}
                 <div>
                   <label className="text-xs font-semibold text-stone-300 uppercase tracking-wider font-mono block mb-2">
@@ -139,11 +188,11 @@ export default function ContactForm() {
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                     className="w-full bg-stone-950 border border-stone-850 rounded-xl px-4 py-3 text-stone-300 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-sans"
                   >
-                    <option value="Gastronomía">Gastronomía (Meal Prep / Viandas / Restaurant)</option>
-                    <option value="Alimentos Saludables">Alimentos Saludables & Almacén</option>
+                    <option value="Gastronomía">Gastronomía</option>
+                    <option value="Alimentos Saludables">Alimentos Saludables</option>
                     <option value="Servicios Profesionales">Servicios Profesionales</option>
-                    <option value="Indumentaria / Comercio">Indumentaria o Comercio Local</option>
-                    <option value="Otro">Otro Emprendimiento de Impacto</option>
+                    <option value="Indumentaria / Comercio">Indumentaria o Comercio</option>
+                    <option value="Otro">Otro Emprendimiento</option>
                   </select>
                 </div>
               </div>
@@ -162,13 +211,20 @@ export default function ContactForm() {
                 />
               </div>
 
+              {submitError && (
+                <div className="text-xs font-medium text-rose-400 bg-rose-950/20 border border-rose-900/50 rounded-xl p-4 font-sans">
+                  {submitError}
+                </div>
+              )}
+
               {/* Submit CTA */}
               <button
                 type="submit"
+                disabled={isSubmitting}
                 id="submit-contact-form"
-                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm py-4 rounded-xl transition-all shadow-lg shadow-emerald-950/60 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm py-4 rounded-xl transition-all shadow-lg shadow-emerald-950/60 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Enviar Consulta Estratégica
+                {isSubmitting ? 'Enviando consulta...' : 'Enviar Consulta Estratégica'}
                 <Send className="h-4 w-4" />
               </button>
             </form>
@@ -186,7 +242,7 @@ export default function ContactForm() {
                 ¡Gracias por tu mensaje, {formData.name}!
               </h3>
               <p className="text-stone-300 text-sm max-w-md mx-auto leading-relaxed mb-8">
-                Tu propuesta para {formData.business || 'tu marca'} de {formData.type} en {formData.location} fue procesada con éxito. Verónica responderá tu correo a la brevedad.
+                Tu consulta sobre {formData.business || 'tu proyecto'} fue enviada con éxito. Me pondré en contacto con vos al correo <strong>{formData.email}</strong> a la brevedad.
               </p>
 
               {/* Live Direct Contact CTA Options */}
